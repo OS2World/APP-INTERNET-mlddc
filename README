@@ -1,0 +1,124 @@
+mlddc is a client for the Monolith ( http://www.ml.org )
+dynamic DNS ( DYNDNS, http://www.ml.org/dyndns/ ) service.
+It updates the ML database and nameservers with the current IP.
+
+
+
+   USAGE
+   _____
+
+'mlddc' reads your hostname (without ".dyn.ml.org"), MID and
+password from stdin.
+
+You can either create a file with this info and type:
+
+"mlddc <mymldata"
+
+or use 'mlupd'.
+
+In any case make sure that the file with your password can 
+not be read or executed by anyone else (eg "chmod 700 mlupd" ).
+
+This kind of info can't be passed on the command line because
+then anybody would be able find out your password by typing "ps axwww".
+
+To "deactivate" your host use "mlddc d <mymldata" or "mlupd d".
+
+If you would like to run mlddc from ip-up and/or keep a log file and are using
+bash, you can run it as:
+
+ (mlupd 2>&1) >>/var/log/mlddc
+ 
+or
+
+ (mlddc <mymldata 2>&1) >>/var/log/mlddc
+ 
+ 
+
+   MORE INFO
+   _________
+
+ML DynDNS FAQ:                 http://www.ml.org/support/faq.html
+Dynamic-IP-Hacks Mini-HowTo:   http://sunsite.unc.edu/LDP/HOWTO/mini/Dynamic-IP-Hacks
+
+
+
+   LATEST VERSION
+   ______________
+
+The lastest version of MLDDC should always be available at:
+
+[source + precompiled Linux i386 ELF libc binary]
+
+ http://skawina.home.ml.org/mlddc.html
+
+
+
+   PLATFORMS
+   _________
+   
+   
+  LINUX
+   
+The precompiled binary is a Linux i386 ELF libc file.
+
+ INSTALLATION
+
+1. "make install"    - This will copy 'mlddc' to '/usr/local/bin'
+      (this is optional, should be done as root)
+
+If you want to use the mlupd script:
+
+2. Edit the 'mlupd' with your hostname, MID and password.
+   Move it to a directory in your $PATH (like '~/bin'), but make
+   sure it can not be accessed by anyone but you!
+
+
+  FREEBSD
+  
+The precompiled Linux version can be run using FreeBSD's Linux emulator.
+
+
+  SOLARIS
+  
+MLDDC needs to be linked with libnsl and libsocket.
+Use "make mlddc.sol" to compile.
+  
+  
+  OS/2
+  
+A precompiled OS/2 version is in the os2 directory.
+
+  AMIGA
+
+A precompiled Amiga executable is available in the amiga directory
+and/or from <URL-unknown-yet> Aminet
+See also: README.ports
+
+  MAC
+
+http://www.geocities.com/Area51/Lair/6936/Mac_mlddc.html
+
+
+
+   SECURITY
+   ________
+   
+All data, including MID and password, are sent unencrypted over the net
+by the "STD" version.
+There is a "SECURE" version available that encrypts all sent/received data.
+( http://ii.pw.edu.pl/~skawina/mlddcs.tgz )
+[a precompiled os/2 version is also availabe from 
+ http://ii.pw.edu.pl/~skawina/mlddcs-os2.zip ]
+
+
+   FEEDBACK
+   ________
+
+If you have any questions/comments/bug-reports/ideas etc
+feel free to email me.
+
+
+Artur Skawina
+skawina@usa.net
+http://skawina.home.ml.org

@@ -1,0 +1,98 @@
+Short:    Amiga port of mlddc, another Monolith client
+Author:   skawina@usa.net (Artur Skawina)
+Author:   peoyli@algonet.se (P-O Yliniemi)
+Uploader: peoyli@algonet.se (P-O Yliniemi)
+Version:  3.1.8/1.0
+Type:     comm/tcp
+Requires: dev/ade/ixemul.lha
+
+************************************************
+** mlddc 3.1.8 Amiga port 1.0 by P-O Yliniemi **
+************************************************
+
+This is the Amiga port of mlddc, a program that updates the Monolith
+database and nameservers with your current IP.
+
+The only changes I had to make was in the makefile (just the CFLAGS
+and BINDIR).
+
+If you want to remake the program, you must have the complete GCC
+package installed on your system.
+
+Installation:
+*-*-*-*-*-*-*
+Copy the file "mlddc" to a directory in your command path, "amitcp:bin",
+"c:" and "Miami:" are good choices.
+
+
+Usage from shell:
+*-*-*-*-*-*-*-*-*
+'mlddc' reads your hostname, MID and password from stdin.
+
+Create a file with this info and type:
+
+"mlddc < mymldata"
+
+To deactivate your host use "mlddc d < mymldata"
+
+If you have "sh" installed, you can use the UNIX shell script 'mlupd'
+to update and deactivate your host:
+
+Activate:
+
+"mlupd"
+
+Deactivate:
+
+"mlupd d"
+
+
+Usage from Miami:
+*-*-*-*-*-*-*-*-*
+Go to the "Events" page in the Miami configuration (main program GUI).
+
+Type "miami:online.miami" in the string gadget for the "Online event".
+Set the cycle gadget so it says "ARexx".
+
+Create the ARexx script miami:online.miami
+
+------------------------ cut ---------------------------------
+/* Things to do when Miami gets online */
+address command "c:mlddc < s:mymldata"
+------------------------ cut ---------------------------------
+
+The reason I suggest you to put the command in an ARexx script is
+that you might want to do something more than just update your IP.
+You could also have used a shell script for the command, and the
+contents of the file should only have to be:
+
+------------------------ cut ---------------------------------
+c:mlddc < s:mymldata
+------------------------ cut ---------------------------------
+
+Since ARexx is more powerful than shell scripts, I suggest you to
+use the ARexx variant.
+
+Offline scripts:
+
+------------------------ cut ---------------------------------
+/* Things to do when Miami gets offline */
+address command "c:mlddc d < s:mymldata"
+------------------------ cut ---------------------------------
+
+or
+
+------------------------ cut ---------------------------------
+c:mlddc d < s:mymldata
+------------------------ cut ---------------------------------
+
+Change the paths if necessary.
+
+
+*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+snail:                         e-mail:   peoyli@algonet.se
+       P-O Yliniemi            homepage: http://www.algonet.se/~peoyli
+       Aspvagen 4E             voice:    +46-927-12293
+       SE-957 32 Overtornea
+       SWEDEN
+*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*

@@ -1,0 +1,9 @@
+This patch adds support for HTTP proxies to MLDDC.
+
+[ It's againt MLDDC 3.1.8 and you may have to apply it by hand to newer versions.
+  If your ISP blocks outgoing connections to port 80 please try the secure
+  version of MLDDC ( http://ii.pw.edu.pl/~skawina/mlddcs.tgz ) first, and if that
+  does not work, send me an email (skawina@usa.net) and I'll consider adding
+  this functionality. AS ]
+
+Patch author: Andreas Pretzsch <andypre@Goeppingen.netsurf.de>

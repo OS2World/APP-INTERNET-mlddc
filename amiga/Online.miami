@@ -1,0 +1,2 @@
+/* Miami Online script */
+address command "c:mlddc < s:mldata"

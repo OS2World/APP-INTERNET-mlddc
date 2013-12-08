@@ -1,0 +1,200 @@
+diff -u mlddc-3.1.8/CHANGES mlddc-3.1.9/CHANGES
+--- mlddc-3.1.8/CHANGES	Sat Sep 13 09:03:13 1997
++++ mlddc-3.1.9/CHANGES	Sat Nov  1 23:45:22 1997
+@@ -32,4 +32,8 @@
+    - added SYSLOG support (suggested by Olav Woelfelschneider <wosch@rbg.inform
+atik.th-darmstadt.de>)
+ 3.1.8b
+    - added info about a mac and a amiga port, updated documentation
+-   
++3.1.9
++   Andreas Pretzsch <andypre@Goeppingen.netsurf.de>:
++   - added support for proxies (compile-time option in config.h)
++   - added option "-p" for setting the IP address for the dynamic host
++   - changed command line interpretion to use getopt()
+diff -u mlddc-3.1.8/README mlddc-3.1.9/README
+--- mlddc-3.1.8/README	Sat Sep 13 08:55:18 1997
++++ mlddc-3.1.9/README	Sun Nov  2 00:14:26 1997
+@@ -7,7 +7,10 @@
+    USAGE
+    _____
+ 
+-'mlddc' reads your hostname, MID and password from stdin.
++A short help is avivable with 'mlddc -h'.
++
++'mlddc' reads your hostname (without ".dyn.ml.org" !), MID and password
++from stdin.
+ 
+ You can either create a file with this info and type:
+ 
+@@ -31,8 +34,23 @@
+ or
+ 
+  (mlddc <mymldata 2>&1) >>/var/log/mlddc
+- 
+- 
++
++
++   PROXY
++   -----
++If you have to go through I proxy on port 80 (www) 'mlddc' has to go a
++different way: It must connect to the proxy (normally on port 8080) and
++send a slightly different request. Also the IP address which should be
++used for the dynamic hostname must be specified, as letting ML's server
++find out your IP will result in the proxy's IP.
++The first part is done by editing "config.h". Define PROXY and set PROXYHOST
++and PROXYPORT. The second part is done by giving 'mlddc' the option -p with
++the IP address.
++Example:
++  "mlddc -p 111.222.333.444 < mymldata" for activating the hostname
++  "mlddc -d -p 111.222.333.444 < mymldata" for deactivating the hostname
++                                           (with '-p ...' worked here too ...)
++
+ 
+    MORE INFO
+    _________
+Common subdirectories: mlddc-3.1.8/amiga and mlddc-3.1.9/amiga
+diff -u mlddc-3.1.8/config.h mlddc-3.1.9/config.h
+--- mlddc-3.1.8/config.h	Fri Aug  8 23:06:14 1997
++++ mlddc-3.1.9/config.h	Sun Nov  2 00:03:10 1997
+@@ -1,3 +1,10 @@
+ // 
+ // 
+ // #define USE_SYSLOG
++
++
++// define these when you have to go through a proxy
++
++//#define PROXY
++//#define PROXYHOST	"proxy.Goeppingen.netsurf.de"
++//#define PROXYPORT	8080
+diff -u mlddc-3.1.8/mlddc.cc mlddc-3.1.9/mlddc.cc
+--- mlddc-3.1.8/mlddc.cc	Fri Aug  8 23:31:16 1997
++++ mlddc-3.1.9/mlddc.cc	Sun Nov  2 00:05:58 1997
+@@ -5,12 +5,13 @@
+  *
+  */
+  
+-#define MLDDC_VERSION   "3.1.8"
++#define MLDDC_VERSION   "3.1.9"
+ 
+ #include <string.h>
+ #include <unistd.h>
+ #include <stdlib.h>
+ #include <stdio.h>
++#include <getopt.h>
+ 
+ #include "config.h"
+ 
+@@ -83,13 +84,19 @@
+    static char    myhost[128],
+                   mymid[128],
+                   mypass[128];
+-   char           *action = "act";
+-                  
++   char           action[4] = "act";
++   char           my_ip[16] = {0};
++
+    char           *result;        /*from http-query*/
+    char           *c;
+-   
++
+    int len;
+-                  
++
++   char opt;
++   int i;
++   extern char *optarg;
++   extern int optind;
++
+ 
+    printf( "MLDDC %s "
+             SECSTAT
+@@ -97,13 +104,35 @@
+ 
+    SYSLOG( openlog( "mlddc", 0, LOG_AUTHPRIV|LOG_NOTICE ) );
+ 
+-   if ( argc>1 )
+-   {
+-      if ( (argv[1][0] == 'd') || (argv[1][0] == 'D') )
+-         action = "dec";
+-      printf( "Deactivating\n" );
+-   }
+-   
++
++   /* command line option parsing */
++   while ((opt = getopt(argc, argv, "dDhHp:P:")) != -1)
++     {
++     switch (opt)
++      {
++      case 'h': case 'H': /* help */
++        printf("Syntax: %s [option]\n"
++               "  options: -h         this help\n"
++               "           -d or d    deactivate\n"
++               "           -p my_ip   set dynamic IP-address\n\n", argv[0]);
++        exit(0);
++      case 'd': case 'D': /* deactivate */
++        strcpy(action, "dec");
++        break;
++      case 'p': case 'P': /* ip addr */
++        strncpy(my_ip, optarg, 15); my_ip[15]=0;
++        break;
++      default:
++        exit(0);
++      }
++     }
++   for (i=optind; i<argc; i++)
++     {
++     if (argv[i][0] == 'd' || argv[i][0] == 'D') /* deactivate */
++       strcpy(action, "dec");
++     }
++
++
+             /* Get user data */
+             /* and */
+             /* Check the user data */
+@@ -128,12 +157,29 @@
+     int           i;
+     netsock       sock;
+ 
++#ifdef PROXY
++    sock = Connect( PROXYHOST, PROXYPORT );
++#else
+     sock = Connect( URLHOST, URLPORT );
+-        
+-            /* Prepare the URL */
+-            
++#endif        
++
++   /* Prepare the URL */
+    sprintf( URLPATH, URLPATHF, myhost, action );
++   if (my_ip[0]) /* set ip address in request */
++     {
++     strcat(URLPATH, "&ipaddr=");
++     strcat(URLPATH, my_ip);
++     }
+ 
++#ifdef PROXY
++   sprintf( buf, "GET http://%s%s HTTP/1.0\r\n"
++                              "Host: %s\r\n"
++                              "Pragma: no-cache\r\n"
++                              "User-Agent: mlddc/" MLDDC_VERSION "/" SECSTAT "\
+r\n"
++                              "Authorization: Basic %s\r\n"
++                              "\r\n",
++                                        URLHOST, URLPATH, URLHOST, mypass );
++#else
+    sprintf( buf, "GET %s HTTP/1.0\r\n"
+                               "Host: %s\r\n"
+                               "Pragma: no-cache\r\n"
+@@ -141,7 +187,9 @@
+                               "Authorization: Basic %s\r\n"
+                               "\r\n",
+                                         URLPATH, URLHOST, mypass );
+-    
++#endif        
++
++   
+    if ( write( sock, buf, strlen( buf ) ) != (ssize_t)strlen( buf ) )
+       fatalerr( "write( buf )" );
+    

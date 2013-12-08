@@ -1,0 +1,33 @@
+MLDDC was originally a Linux program, but it has now been successfully
+compiled on several other platforms. The precompiled binaries
+distributed in this archive and the info below were provided by other
+people, since I do not have access to all of these platforms.
+
+If you port MLDDC to a platform not listed in this file, please send me
+an email (skawina@usa.net).
+
+
+
+   OS/2 ( Samuel Audet <guardia@cam.org> )
+
+To compile on your own, whoop up your make utility with mlddc.exe as
+parameter.  GNU Make works great.  dmake 3.8 also works, but you will have
+to comment out the ifdef SECURE...endif lines in the Makefile. 
+
+The included EXE requires EMX DLLs to run, they are available at
+ftp://hobbes.nmsu.edu/pub/os2/dev/emx/v0.9c/emxrt.zip
+   
+   
+   Amiga ( P-O Yliniemi <peoyli@algonet.se> http://www.algonet.se/~peoyli/ )
+   
+The only changes I had to make was in the makefile (just the CFLAGS and
+BINDIR).
+
+If you want to remake the program, you must have the complete GCC
+package installed on your system.
+
+
+   Mac ( Kaitan Dominica <kaitan@usa.net> )
+   
+http://www.geocities.com/Area51/Lair/6936/Mac_mlddc.html
+

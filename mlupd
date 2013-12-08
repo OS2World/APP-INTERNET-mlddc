@@ -1,0 +1,6 @@
+#!/bin/sh
+mlddc $1 <<END
+myhost
+mid
+12-34-56
+END
